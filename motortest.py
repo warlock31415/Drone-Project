@@ -134,6 +134,45 @@ def key_rover(ch,prev_ch,motorspeed,motors_enabled):
             prev_ch = 'Stopped'
         return motorspeed, motors_enabled
 
+#Keagan's PS3 Contoller to Rover Function
+#ps3.get_axis(0)
+#Left stick left/right: 0
+#Left stick up/down: 1     ##this should be the throttle
+#Right stick left/right: 2 ##this should be the steering
+#Right stick up/down: 3
+# For now, I am assuming that all axes of each joystick are passed in,
+# even though only the left stick's up/down and the right stick's left/right
+# are going to be used.
+# Note: deadzone is the area around the origin where it is designed so that 
+#       there is no input when the joystick is very close to the origin, but
+#       not quite there.  This will be a constant defined later.
+def ps3_rover(left_x_axis,left_y_axis,right_x_axis,right_y_axis,motorspeed,motors_enabled,deadzone):
+    left_x_axis = ps3_to_motoraxis_conv(left_x_axis,deadzone)
+    left_y_axis = ps3_to_motoraxis_conv(left_y_axis,deadzone)
+    right_x_axis = ps3_to_motoraxis_conv(right_x_axis,deadzone)
+    right_y_axis = ps3_to_motoraxis_conv(right_y_axis,deadzone)
+    
+    
+    
+    return motorspeed, motors_enabled
+
+#This function translates the PS3's -1 to DEADZONE U DEADZONE to +1 range into the rover's -480 to +480 range
+def ps3_to_motoraxis_conv(ps3,deadzone)
+    #When ps3 joystick is positive and greater than deadzone
+    if ps3 > deadzone:
+        motoraxis = (ps3 - deadzone)*480/(1 - deadzone)
+    #When ps3 joystick is negative and less than deadzone
+    elif ps3 < -deadzone:
+        motoraxis = (ps3 + deadzone)*480/(1 - deadzone)
+    #When ps3 joystick is within deadzone
+    else:
+        motoraxis = 0
+    
+    #Round off the float to an integer so the motor controller can read it.
+    motoraxis = int(round(motoraxis))
+    return motoraxis
+
+
 def callback(data):
      rospy.loginfo("%s", data.data)
 
